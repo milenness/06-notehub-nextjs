@@ -20,7 +20,7 @@ export default function NoteDetailsClient() {
   if (isLoading) {
     return <p>Loading, please wait...</p>;
   }
-    
+
   if (error || !note) {
     return <p>Something went wrong.</p>;
   }
