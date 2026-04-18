@@ -1,4 +1,6 @@
-import { useEffect, type ReactNode } from "react";
+"use client";
+
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import css from "./Modal.module.css";
 
@@ -7,10 +9,19 @@ interface ModalProps {
   onClose: () => void;
 }
 
-const modalRoot = document.querySelector("#modal-root") || document.body;
-
 export default function Modal({ children, onClose }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    // Цей коментар вимикає попередження лінтера, оскільки цей паттерн
+    // є необхідним для безпечної гідратації в Next.js
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     document.body.style.overflow = "hidden";
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -23,11 +34,15 @@ export default function Modal({ children, onClose }: ModalProps) {
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [onClose]);
+  }, [mounted, onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) onClose();
   };
+
+  if (!mounted) return null;
+
+  const modalRoot = document.querySelector("#modal-root") || document.body;
 
   return createPortal(
     <div
